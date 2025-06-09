@@ -29,6 +29,9 @@ const recipeSchema = new Schema({
   nbPeople: {
     type: String
   },
+  imageUrl:{
+    type: String
+  },
   nbPeopleUnit: {
     type: String,
     enum: ['Pers.', 'Pièces'],
