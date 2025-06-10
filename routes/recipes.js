@@ -37,8 +37,8 @@ recipeRoute.route('/').get((req, res, next) => {
     .then((recipes) => {
       res.json({
         recipes,
-        lastId: items.length > 0 ? items[items.length - 1]._id : null,
-        hasMore: items.length === limit
+        lastId: recipes.length > 0 ? recipes[recipes.length - 1].recipeID : null,
+        hasMore: recipes.length === limit
       });
   }).catch(err => next(err));
 });
