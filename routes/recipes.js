@@ -2,7 +2,7 @@ import express from 'express';
 import Recipe from '../models/recipe.js'; // Import the Recipe model
 const recipeRoute = express.Router();
 
-recipeRoute.route('/').get((req, res, next) => {
+/*recipeRoute.route('/').get((req, res, next) => {
   Recipe.find() // To get all recipes
     .sort({recipeID: -1})
     .limit(500)
@@ -21,6 +21,25 @@ recipeRoute.route('/pagination/:page').get((req, res, next) => {
     .exec()
     .then((recipes) => {
       res.json(recipes); // return recipes in JSON format
+  }).catch(err => next(err));
+});*/
+
+recipeRoute.route('/').get((req, res, next) => {
+  const limit = 20;
+  const lastId = req.query.lastId;
+
+  const query = lastId ? { recipeID: { $lt: lastId } } : {};
+
+  Recipe.find(query) // To get all recipes
+    .sort({recipeID: -1})
+    .limit(limit)
+    .exec()
+    .then((recipes) => {
+      res.json({
+        recipes,
+        lastId: items.length > 0 ? items[items.length - 1]._id : null,
+        hasMore: items.length === limit
+      });
   }).catch(err => next(err));
 });
 
