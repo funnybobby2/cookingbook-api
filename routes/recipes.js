@@ -25,7 +25,7 @@ recipeRoute.route('/pagination/:page').get((req, res, next) => {
 });*/
 
 recipeRoute.route('/').get((req, res, next) => {
-  const limit = 20;
+  const limit = 100;
   const lastId = req.query.lastId;
 
   const query = lastId ? { recipeID: { $lt: lastId } } : {};
