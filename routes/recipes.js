@@ -74,6 +74,8 @@ recipeRoute.route('/').get(async (req, res, next) => {
     filter.deletedBy = onlyDeleted ;
   }
 
+  console.log(filter)
+
   // Query Mongo avec pagination
   const [recipes, total] = await Promise.all([
     Recipe.find(filter).skip(skip).limit(limit).lean(),
