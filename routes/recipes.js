@@ -50,15 +50,15 @@ recipeRoute.route('/').get(async (req, res, next) => {
 
 
   if(onlyValidated){
-    filter.validatedBy = { $in: [onlyValidated] };
+    filter.validatedBy = onlyValidated;
   }
 
   if(onlyNew){
-    filter.validatedBy = { $nin: [onlyNew] };
+    filter.validatedBy = {"$not": {"$elemMatch": {"$eq": onlyNew}}};
   }
 
   if(onlyDeleted){
-    filter.deletedBy = { $in: [onlyDeleted] };
+    filter.deletedBy = onlyDeleted ;
   }
 
   // Query Mongo avec pagination
