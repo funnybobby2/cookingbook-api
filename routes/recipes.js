@@ -17,7 +17,7 @@ recipeRoute.route('/').get(async (req, res, next) => {
   const maxMark = parseFloat(req.query.maxMark) || 5;
 
   const category = req.query.category || "all";
-  const q = req.query.query || "";
+  const q = req.query.q || "";
 
   const onlyValidated = req.query.validated | undefined;
   const onlyNew = req.query.new | undefined;
