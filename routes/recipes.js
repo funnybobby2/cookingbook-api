@@ -2,45 +2,80 @@ import express from 'express';
 import Recipe from '../models/recipe.js'; // Import the Recipe model
 const recipeRoute = express.Router();
 
-/*recipeRoute.route('/').get((req, res, next) => {
-  Recipe.find() // To get all recipes
-    .sort({recipeID: -1})
-    .limit(500)
-    .exec()
-    .then((recipes) => {
-      res.json(recipes); // return recipes in JSON format
-  }).catch(err => next(err));
-});
-
-// Get all recipes
-recipeRoute.route('/pagination/:page').get((req, res, next) => {
-  Recipe.find() // To get all recipes
-    .sort({recipeID: -1})
-    .skip(req.params.page * 100)
-    .limit(100)
-    .exec()
-    .then((recipes) => {
-      res.json(recipes); // return recipes in JSON format
-  }).catch(err => next(err));
-});*/
-
-recipeRoute.route('/').get((req, res, next) => {
+recipeRoute.route('/').get(async (req, res, next) => {
   const limit = 100;
-  const lastId = req.query.lastId;
 
-  const query = lastId ? { recipeID: { $lt: lastId } } : {};
+  try{
+  // extract query params
+  const page = parseInt(req.query.page) || 1;
+  const skip = (page - 1) * limit;
 
-  Recipe.find(query) // To get all recipes
-    .sort({recipeID: -1})
-    .limit(limit)
-    .exec()
-    .then((recipes) => {
-      res.json({
-        recipes,
-        lastId: recipes.length > 0 ? recipes[recipes.length - 1].recipeID : null,
-        hasMore: recipes.length === limit
-      });
-  }).catch(err => next(err));
+  const minSpicy = parseInt(req.query.minSpicy) || 0;
+  const maxSpicy = parseInt(req.query.maxSpicy) || 3;
+
+  const minMark = parseFloat(req.query.minMark) || 0;
+  const maxMark = parseFloat(req.query.maxMark) || 5;
+
+  const category = req.query.category || "all";
+  const q = req.query.query || "";
+
+  const onlyValidated = req.query.validated | undefined;
+  const onlyNew = req.query.new | undefined;
+  const onlyDeleted = req.query.deleted | undefined;
+  
+  // construct the mongo filter
+  const filter = {};
+
+  if (q.length > 0) {
+    filter.title = { $regex: query, $options: "i" };
+  }
+
+  if (category && category.toLowerCase() !== "all") {
+    filter.category = category.toLowerCase();
+  }
+
+  filter.spicy = { $gte: minSpicy, $lte: maxSpicy };
+
+  filter.$expr = {
+    $or: [
+      { $eq: ["$nbMark", 0] },
+      {
+        $and: [
+          { $gte: [{ $divide: ["$mark", "$nbMark"] }, minMark] },
+          { $lte: [{ $divide: ["$mark", "$nbMark"] }, maxMark] },
+        ],
+      },
+    ],
+  };
+
+
+  if(onlyValidated){
+    filter.validatedBy = onlyValidated;
+  }
+
+  if(onlyNew){
+    filter.validatedBy = { $nin: [onlyNew] };
+  }
+
+  // Query Mongo avec pagination
+  const [recipes, total] = await Promise.all([
+    Recipe.find(filter).skip(skip).limit(limit).lean(),
+    Recipe.countDocuments(filter),
+  ]);
+
+  const hasMore = page * limit < total;
+
+  res.json({
+      recipes,
+      page,
+      total,
+      hasMore,
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 recipeRoute.route('/count').get((req, res, next) => {

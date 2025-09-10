@@ -15,11 +15,12 @@ cloudinary.config({
 });
 
 // 2. MongoDB connection
+mongoose.set('strictQuery', false);
 await mongoose.connect(process.env.MONGODB_URI);
 console.log('✅ Connected to MongoDB');
 
 // 3. Get images from local folder
-const imageFolder = '../../cookingbook-next/public/assets/img/plats';
+const imageFolder = 'C:/Users/funnybobby/Desktop/Projets/cookingbook-next/public/new';
 const files = fs.readdirSync(imageFolder).filter(file =>
   ['.jpg'].includes(path.extname(file).toLowerCase())
 );
