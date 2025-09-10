@@ -27,7 +27,7 @@ recipeRoute.route('/').get(async (req, res, next) => {
   const filter = {};
 
   if (q.length > 0) {
-    filter.title = { "$regex": query, "$options": "i" };
+    filter.title = { "$regex": q, "$options": "i" };
   }
 
   if (category && category.toLowerCase() !== "all") {
