@@ -31,7 +31,7 @@ recipeRoute.route('/').get(async (req, res, next) => {
   }
 
   if (category && category.toLowerCase() !== "all") {
-    filter.category = category.toLowerCase();
+    filter.category.toLowerCase() = category.toLowerCase();
   }
 
   filter.spicy = { $gte: minSpicy, $lte: maxSpicy };
