@@ -27,7 +27,7 @@ recipeRoute.route('/').get(async (req, res, next) => {
   const filter = {};
 
   if (q.length > 0) {
-    filter.title = { $regex: query, $options: "i" };
+    filter.title = { "$regex": query, "$options": "i" };
   }
 
   if (category && category.toLowerCase() !== "all") {
@@ -36,17 +36,30 @@ recipeRoute.route('/').get(async (req, res, next) => {
 
   filter.spicy = { $gte: minSpicy, $lte: maxSpicy };
 
-  filter.$expr = {
-    $or: [
-      { $eq: ["$nbMark", 0] },
-      {
-        $and: [
-          { $gte: [{ $divide: ["$mark", "$nbMark"] }, minMark] },
-          { $lte: [{ $divide: ["$mark", "$nbMark"] }, maxMark] },
-        ],
-      },
-    ],
-  };
+  if (minMark > 0) {
+    // exclude recipes without mark
+    filter.$expr = {
+      $and: [
+        { $gt: ["$nbMark", 0] },
+        { $gte: [{ $divide: ["$mark", "$nbMark"] }, minMark] },
+        { $lte: [{ $divide: ["$mark", "$nbMark"] }, maxMark] },
+      ],
+    };
+  } else {
+    // authorise recipes without mark if minMark = 0
+    filter.$expr = {
+      $or: [
+        { $eq: ["$nbMark", 0] },
+        {
+          $and: [
+            { $gt: ["$nbMark", 0] },
+            { $gte: [{ $divide: ["$mark", "$nbMark"] }, minMark] },
+            { $lte: [{ $divide: ["$mark", "$nbMark"] }, maxMark] },
+          ],
+        },
+      ],
+    };
+  }
 
 
   if(onlyValidated){
