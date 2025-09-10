@@ -36,14 +36,6 @@ app.use(cors());
 app.use('/api/recipes', recipeRoute);
 app.use('/api/users', userRoute);
 
-// image Upload
-app.post('/api/upload', upload.single('image'), (req, res) => {
-  if (!req.file || !req.file.path) {
-    return res.status(400).json({ error: 'Image non envoyée' });
-  }
-  res.json({ url: req.file.path });
-});
-
 // Create port
 const port = process.env.PORT || 4000;
 const server = app.listen(port, '0.0.0.0', () => {

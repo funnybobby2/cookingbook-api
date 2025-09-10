@@ -11,7 +11,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'recettes', // dossier dans ton compte Cloudinary
+    folder: 'recettes', // dossier dans Cloudinary
     allowed_formats: ['jpg', 'jpeg', 'png'],
     transformation: [{ width: 150, height: 150, crop: 'limit' }]
   }
