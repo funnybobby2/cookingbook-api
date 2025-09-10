@@ -19,9 +19,9 @@ recipeRoute.route('/').get(async (req, res, next) => {
   const category = req.query.category || "all";
   const q = req.query.q || "";
 
-  const onlyValidated = req.query.validated | undefined;
-  const onlyNew = req.query.new | undefined;
-  const onlyDeleted = req.query.deleted | undefined;
+  const onlyValidated = req.query.validated ?? "";
+  const onlyNew = req.query.new ?? "";
+  const onlyDeleted = req.query.deleted ?? "";
   
   // construct the mongo filter
   const filter = {};
@@ -63,7 +63,7 @@ recipeRoute.route('/').get(async (req, res, next) => {
 
 
   if(onlyValidated){
-    filter.validatedBy = onlyValidated;
+    filter.validatedBy = {"$elemMatch": {"$eq": onlyValidated}};
   }
 
   if(onlyNew){
@@ -71,10 +71,8 @@ recipeRoute.route('/').get(async (req, res, next) => {
   }
 
   if(onlyDeleted){
-    filter.deletedBy = onlyDeleted ;
+    filter.deletedBy = {"$elemMatch": {"$eq": onlyDeleted}};
   }
-
-  console.log(filter)
 
   // Query Mongo avec pagination
   const [recipes, total] = await Promise.all([
