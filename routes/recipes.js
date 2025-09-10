@@ -22,7 +22,7 @@ recipeRoute.route('/').get(async (req, res, next) => {
   const onlyValidated = req.query.validated ?? "";
   const onlyNew = req.query.new ?? "";
   const onlyDeleted = req.query.deleted ?? "";
-  
+
   // construct the mongo filter
   const filter = {};
 
@@ -61,7 +61,6 @@ recipeRoute.route('/').get(async (req, res, next) => {
     };
   }
 
-
   if(onlyValidated){
     filter.validatedBy = {"$elemMatch": {"$eq": onlyValidated}};
   }
@@ -76,7 +75,7 @@ recipeRoute.route('/').get(async (req, res, next) => {
 
   // Query Mongo avec pagination
   const [recipes, total] = await Promise.all([
-    Recipe.find(filter).skip(skip).limit(limit).lean(),
+    Recipe.find(filter).sort({recipeID: -1}).skip(skip).limit(limit).lean(),
     Recipe.countDocuments(filter),
   ]);
 
