@@ -101,6 +101,77 @@ recipeRoute.route('/count').get((req, res, next) => {
   }).catch(err => next(err));
 });
 
+recipeRoute.route('/all').get(async (req, res, next) => {
+  try {
+    const minSpicy = parseInt(req.query.minSpicy) || 0;
+    const maxSpicy = parseInt(req.query.maxSpicy) || 3;
+
+    const minMark = parseFloat(req.query.minMark) || 0;
+    const maxMark = parseFloat(req.query.maxMark) || 5;
+
+    const category = req.query.category || "all";
+    const q = req.query.q || "";
+
+    const onlyValidated = req.query.validated ?? "";
+    const onlyNew = req.query.new ?? "";
+    const onlyDeleted = req.query.deleted ?? "";
+
+    const filter = {};
+
+    if (q.length > 0) {
+      filter.title = { "$regex": q, "$options": "i" };
+    }
+
+    if (category && category.toLowerCase() !== "all") {
+      filter.category = category.toLowerCase();
+    }
+
+    filter.spicy = { $gte: minSpicy, $lte: maxSpicy };
+
+    if (minMark > 0) {
+      filter.$expr = {
+        $and: [
+          { $gt: ["$nbMark", 0] },
+          { $gte: [{ $divide: ["$mark", "$nbMark"] }, minMark] },
+          { $lte: [{ $divide: ["$mark", "$nbMark"] }, maxMark] },
+        ],
+      };
+    } else {
+      filter.$expr = {
+        $or: [
+          { $eq: ["$nbMark", 0] },
+          {
+            $and: [
+              { $gt: ["$nbMark", 0] },
+              { $gte: [{ $divide: ["$mark", "$nbMark"] }, minMark] },
+              { $lte: [{ $divide: ["$mark", "$nbMark"] }, maxMark] },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (onlyValidated) {
+      filter.validatedBy = { "$elemMatch": { "$eq": onlyValidated } };
+    }
+
+    if (onlyNew) {
+      filter.validatedBy = { "$not": { "$elemMatch": { "$eq": onlyNew } } };
+    }
+
+    if (onlyDeleted) {
+      filter.deletedBy = { "$elemMatch": { "$eq": onlyDeleted } };
+    }
+
+    const recipes = await Recipe.find(filter).sort({ recipeID: -1 }).lean();
+
+    res.json({ recipes, total: recipes.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Get a recipe
 recipeRoute.route('/:id').get((req, res, next) => {
   Recipe.findOne({ recipeID: Number(req.params.id) }) // Pour récupérer la recipe avec cet id
