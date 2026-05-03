@@ -274,6 +274,7 @@ recipeRoute.route('/').post(async (req, res, next) => {
   recipe.ingredients = req.body.recipe.ingredients;
   recipe.steps = req.body.recipe.steps;
   recipe.tags = req.body.recipe.tags;
+  recipe.imageUrl = req.body.recipe.imageUrl;
 
   // save
   await recipe.save();
