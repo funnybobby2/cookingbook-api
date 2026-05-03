@@ -99,7 +99,7 @@ const recipeSchema = new Schema({
     default: false
   },
   validatedBy: [ { type: String }],
-  deletedBy: [ { type: String } ]
+  likedBy: [ { type: String } ]
 }, {
    collection: 'recipes'
 })

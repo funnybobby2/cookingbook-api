@@ -21,7 +21,7 @@ recipeRoute.route('/').get(async (req, res, next) => {
 
   const onlyValidated = req.query.validated ?? "";
   const onlyNew = req.query.new ?? "";
-  const onlyDeleted = req.query.deleted ?? "";
+  const onlyLiked = req.query.liked ?? "";
 
   // construct the mongo filter
   const filter = {};
@@ -69,8 +69,8 @@ recipeRoute.route('/').get(async (req, res, next) => {
     filter.validatedBy = {"$not": {"$elemMatch": {"$eq": onlyNew}}};
   }
 
-  if(onlyDeleted){
-    filter.deletedBy = {"$elemMatch": {"$eq": onlyDeleted}};
+  if(onlyLiked){
+    filter.likedBy = {"$elemMatch": {"$eq": onlyLiked}};
   }
 
   // Query Mongo avec pagination
@@ -114,7 +114,7 @@ recipeRoute.route('/all').get(async (req, res, next) => {
 
     const onlyValidated = req.query.validated ?? "";
     const onlyNew = req.query.new ?? "";
-    const onlyDeleted = req.query.deleted ?? "";
+    const onlyLiked = req.query.liked ?? "";
 
     const filter = {};
 
@@ -159,8 +159,8 @@ recipeRoute.route('/all').get(async (req, res, next) => {
       filter.validatedBy = { "$not": { "$elemMatch": { "$eq": onlyNew } } };
     }
 
-    if (onlyDeleted) {
-      filter.deletedBy = { "$elemMatch": { "$eq": onlyDeleted } };
+    if (onlyLiked) {
+      filter.likedBy = { "$elemMatch": { "$eq": onlyLiked } };
     }
 
     const recipes = await Recipe.find(filter).sort({ recipeID: -1 }).lean();
@@ -209,7 +209,7 @@ recipeRoute.route('/:id').put(async (req, res, next) => {
             recipe[f].remove(commentToDeleted);
             break;
 
-          case 'deletedBy':
+          case 'likedBy':
           case 'validatedBy':
             recipe[f].remove(values[i]);
             break;
