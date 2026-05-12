@@ -23,6 +23,8 @@ recipeRoute.route('/').get(async (req, res, next) => {
   const onlyNew = req.query.new ?? "";
   const onlyLiked = req.query.liked ?? "";
 
+  const maxTime = parseInt(req.query.maxTime) || null;
+
   // construct the mongo filter
   const filter = {};
 
@@ -73,6 +75,12 @@ recipeRoute.route('/').get(async (req, res, next) => {
     filter.likedBy = {"$elemMatch": {"$eq": onlyLiked}};
   }
 
+  if(maxTime){
+    filter.$expr = {
+      $lte: [ { $add: ["$prepPeriod", "$cookPeriod", "$restPeriod"] }, Number(maxTime) ]
+    }
+  }
+
   // Query Mongo avec pagination
   const [recipes, total] = await Promise.all([
     Recipe.find(filter).sort({recipeID: -1}).skip(skip).limit(limit).lean(),
@@ -115,6 +123,8 @@ recipeRoute.route('/all').get(async (req, res, next) => {
     const onlyValidated = req.query.validated ?? "";
     const onlyNew = req.query.new ?? "";
     const onlyLiked = req.query.liked ?? "";
+
+    const maxTime = parseInt(req.query.maxTime) || null;
 
     const filter = {};
 
@@ -162,6 +172,12 @@ recipeRoute.route('/all').get(async (req, res, next) => {
     if (onlyLiked) {
       filter.likedBy = { "$elemMatch": { "$eq": onlyLiked } };
     }
+
+    if(maxTime){
+    filter.$expr = {
+      $lte: [ { $add: ["$prepPeriod", "$cookPeriod", "$restPeriod"] }, Number(maxTime) ]
+    }
+  }
 
     const recipes = await Recipe.find(filter).sort({ recipeID: -1 }).lean();
 
