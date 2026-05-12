@@ -15,16 +15,16 @@ const recipeSchema = new Schema({
     type: String
   },
   prepPeriod: {
-    type: String,
-    default: '0 min'
+     type: Number,
+    default: 0
   },
   cookPeriod: {
-    type: String,
-    default: '0 min'
+     type: Number,
+    default: 0
   },
   restPeriod: {
-    type: String,
-    default: '0 min'
+     type: Number,
+    default: 0
   },
   nbPeople: {
     type: String
