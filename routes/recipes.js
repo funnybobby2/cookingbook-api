@@ -18,6 +18,8 @@ recipeRoute.route('/').get(async (req, res, next) => {
 
   const category = req.query.category || "all";
   const q = req.query.q || "";
+  const tags = req.query.tags || "";
+  const ingredients = req.query.ingredients || "";
 
   const onlyValidated = req.query.validated ?? "";
   const onlyNew = req.query.new ?? "";
@@ -30,6 +32,16 @@ recipeRoute.route('/').get(async (req, res, next) => {
 
   if (q.length > 0) {
     filter.title = { "$regex": q, "$options": "i" };
+  }
+
+  if (tags.length > 0) {
+    const tagTerms = tags.trim().split(/[\s,]+/).filter(Boolean);
+    filter.tags = { $all: tagTerms.map(t => new RegExp(t, 'i')) };
+  }
+
+  if (ingredients.length > 0) {
+    const ingTerms = ingredients.trim().split(/[\s,]+/).filter(Boolean);
+    filter.$and = ingTerms.map(t => ({ "ingredients.ingredient": { $regex: t, $options: "i" } }));
   }
 
   if (category && category.toLowerCase() !== "all") {
@@ -119,6 +131,8 @@ recipeRoute.route('/all').get(async (req, res, next) => {
 
     const category = req.query.category || "all";
     const q = req.query.q || "";
+    const tags = req.query.tags || "";
+    const ingredients = req.query.ingredients || "";
 
     const onlyValidated = req.query.validated ?? "";
     const onlyNew = req.query.new ?? "";
@@ -130,6 +144,16 @@ recipeRoute.route('/all').get(async (req, res, next) => {
 
     if (q.length > 0) {
       filter.title = { "$regex": q, "$options": "i" };
+    }
+
+    if (tags.length > 0) {
+      const tagTerms = tags.trim().split(/[\s,]+/).filter(Boolean);
+      filter.tags = { $all: tagTerms.map(t => new RegExp(t, 'i')) };
+    }
+
+    if (ingredients.length > 0) {
+      const ingTerms = ingredients.trim().split(/[\s,]+/).filter(Boolean);
+      filter.$and = ingTerms.map(t => ({ "ingredients.ingredient": { $regex: t, $options: "i" } }));
     }
 
     if (category && category.toLowerCase() !== "all") {
