@@ -7,6 +7,7 @@ import { upload } from './cloudinary.js';
 
 import recipeRoute from "./routes/recipes.js";
 import userRoute from "./routes/users.js";
+import planningRoute from "./routes/planning.js";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use(cors());
 
 app.use('/api/recipes', recipeRoute);
 app.use('/api/users', userRoute);
+app.use('/api/planning', planningRoute);
 
 // Create port
 const port = process.env.PORT || 4000;
